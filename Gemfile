@@ -5,3 +5,6 @@ gem 'sinatra-contrib'
 gem 'rspec'
 gem 'google-api-client', '0.9'
 gem 'interface'
+
+gem 'rubocop'
+gem 'reek'
