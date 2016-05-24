@@ -1,0 +1,4 @@
+Accompany Interview Project
+===========================
+
+To run, run `bundle install` and then `rackup -p 4567`.
