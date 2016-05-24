@@ -43,7 +43,7 @@ module CalendarProviders
     end
 
     def authed?
-      !credentials.empty?
+      !credentials.nil?
     end
 
     implements CalendarProviders::Interface
