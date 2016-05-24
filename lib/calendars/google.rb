@@ -48,67 +48,66 @@ module CalendarProviders
 
     implements CalendarProviders::Interface
 
-    class << self
-      private
+    private
 
-      def credentials
-        user_id = 'default'
-        authorizer.get_credentials(user_id)
+    def service
+      service = Google::Apis::CalendarV3::CalendarService.new
+      service.client_options.application_name = APPLICATION_NAME
+      service.authorization = credentials
+      service
+    end
+
+    def credentials
+      user_id = 'default'
+      authorizer.get_credentials(user_id)
+    end
+
+    def authorizer
+      client_id = Google::Auth::ClientId.from_file(CLIENT_SECRETS_PATH)
+      token_store = Google::Auth::Stores::FileTokenStore.new(
+        file: CREDENTIALS_PATH
+      )
+      Google::Auth::UserAuthorizer.new(client_id, SCOPE, token_store)
+    end
+
+
+    def event_options(params)
+      options = {
+        max_results: 2500, single_events: true, order_by: 'startTime'
+      }
+
+      unless params[:start].empty?
+        options[:time_min] = DateTime.parse(params[:start]).iso8601
       end
 
-      def service
-        service = Google::Apis::CalendarV3::CalendarService.new
-        service.client_options.application_name = APPLICATION_NAME
-        service.authorization = credentials
-        service
+      unless params[:end].empty?
+        options[:time_max] = DateTime.parse(params[:end]).iso8601
       end
 
-      def authorizer
-        client_id = Google::Auth::ClientId.from_file(CLIENT_SECRETS_PATH)
-        token_store = Google::Auth::Stores::FileTokenStore.new(
-          file: CREDENTIALS_PATH
-        )
-        Google::Auth::UserAuthorizer.new(client_id, SCOPE, token_store)
-      end
+      options
+    end
 
-      def event_options(params)
-        options = {
-          max_results: 2500, single_events: true, order_by: 'startTime'
+    def format_calendars(response)
+      response.items.map do |cal|
+        {
+          id: cal.id,
+          title: cal.summary,
+          visible: (cal.primary || cal.selected),
+          color: cal.background_color,
+          textColor: cal.foreground_color,
+          description: cal.description
         }
-
-        unless params[:start].empty?
-          options[:time_min] = DateTime.parse(params[:start]).iso8601
-        end
-
-        unless params[:end].empty?
-          options[:time_max] = DateTime.parse(params[:end]).iso8601
-        end
-
-        options
       end
+    end
 
-      def format_calendars(response)
-        response.items.map do |cal|
-          {
-            id: cal.id,
-            title: cal.summary,
-            visible: (cal.primary || cal.selected),
-            color: cal.background_color,
-            textColor: cal.foreground_color,
-            description: cal.description
-          }
-        end
-      end
-
-      def format_events(response)
-        response.items.map do |event|
-          {
-            id: event.id,
-            title: event.summary,
-            start: event.start.date_time || event.start.date,
-            end: event.end.date_time || event.end.date
-          }
-        end
+    def format_events(response)
+      response.items.map do |event|
+        {
+          id: event.id,
+          title: event.summary,
+          start: event.start.date_time || event.start.date,
+          end: event.end.date_time || event.end.date
+        }
       end
     end
   end
