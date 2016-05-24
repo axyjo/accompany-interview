@@ -8,6 +8,10 @@ app.Sources = Backbone.Collection.extend({
   url: 'sources'
 });
 
+// A collection to manage an event's attendees
+app.Attendees = Backbone.Collection.extend({
+});
+
 // Events are managed by FullCalendar, so we don't need a collection for those.
 
 /* Views */
