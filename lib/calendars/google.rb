@@ -70,7 +70,6 @@ module CalendarProviders
       Google::Auth::UserAuthorizer.new(client_id, SCOPE, token_store)
     end
 
-
     def event_options(params)
       options = {
         max_results: 2500, single_events: true, order_by: 'startTime'
@@ -106,7 +105,19 @@ module CalendarProviders
           id: event.id,
           title: event.summary,
           start: event.start.date_time || event.start.date,
-          end: event.end.date_time || event.end.date
+          end: event.end.date_time || event.end.date,
+          url: event.html_link,
+          attendees: format_attendees(event.attendees)
+        }
+      end
+    end
+
+    def format_attendees(attendees)
+      return [] unless attendees
+      attendees.map do |attendee|
+        {
+          name: attendee.display_name,
+          email: attendee.email
         }
       end
     end
