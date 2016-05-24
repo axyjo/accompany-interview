@@ -22,12 +22,16 @@ app.RootView = Backbone.View.extend({
   views: {},
   render: function() {
     this.views.cal = new app.CalendarView();
-    this.$el.append(this.views.cal.$el);
     this.views.cal.render();
+    this.$el.append(this.views.cal.$el);
 
     this.views.list = new app.SourceListView({collection: new app.Sources()});
-    this.$el.append(this.views.list.$el);
     this.views.list.render();
+    this.$el.append(this.views.list.$el);
+
+    this.views.contact = new app.ContactListView({collection: new app.Attendees()});
+    this.views.contact.render();
+    this.$el.append(this.views.contact.$el);
   }
 });
 
@@ -65,6 +69,13 @@ app.SourceListRowView = Backbone.View.extend({
   }
 });
 
+app.ContactListRowView = Backbone.View.extend({
+  tagName: 'tr',
+  render: function() {
+    this.$el.empty();
+    this.$el.append(this.model.get('name'));
+  }
+});
 
 // A generic list view to render lists of things.
 app.ListView = Backbone.View.extend({
@@ -125,10 +136,14 @@ app.ContactListView = app.ListView.extend({
 
 // Renders the FullCalendar widget
 app.CalendarView = Backbone.View.extend({
+  eventMouseover: function(event) {
+    // Create a collection of attendees first.
+    app.root.views.contact.collection.reset(event.attendees);
+  },
   render: function() {
     var self = this;
     setTimeout(function() {
-      self.$el.fullCalendar({});
+      self.$el.fullCalendar({eventMouseover: self.eventMouseover});
     }, 0);
   }
 });
