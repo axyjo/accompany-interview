@@ -10,6 +10,23 @@ class AccompanyInterview < Sinatra::Application
     super
   end
 
+  # Google specific route to authenticate the user.
+  get '/googleauth' do
+    if @calendar_providers[:google].authed?
+      redirect '/'
+    else
+      redirect @calendar_providers[:google].auth
+    end
+  end
+
+  # Google specific route once the user authenticates
+  get '/oauth2callback' do
+    if !params['code'].empty?
+      @calendar_providers[:google].auth(params['code'])
+    end
+    redirect '/'
+  end
+
   get '/' do
     erb :index
   end
