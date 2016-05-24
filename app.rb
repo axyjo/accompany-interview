@@ -32,7 +32,11 @@ class AccompanyInterview < Sinatra::Application
   end
 
   get '/sources' do
-    json []
+    calendars = []
+    @calendar_providers.each do |key, provider|
+      calendars << provider.list_calendars
+    end
+    json calendars
   end
 
   get '/events/:provider/:id' do

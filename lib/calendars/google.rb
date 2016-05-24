@@ -18,9 +18,9 @@ module CalendarProviders
       response = service.list_calendar_lists()
       return response.items.map do |cal|
         {
+          id: cal.id,
           title: cal.summary,
           visible: !!(cal.primary || cal.selected),
-          url: '/events/google/' + URI.escape(cal.id),
           color: cal.background_color,
           textColor: cal.foreground_color,
           description: cal.description
@@ -91,6 +91,7 @@ module CalendarProviders
       service = Google::Apis::CalendarV3::CalendarService.new
       service.client_options.application_name = APPLICATION_NAME
       service.authorization = credentials
+      service
     end
   end
 end
