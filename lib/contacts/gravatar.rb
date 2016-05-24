@@ -18,7 +18,21 @@ module ContactProviders
       email.downcase!
       hash = Digest::MD5.hexdigest(email)
       uri = URI.parse("http://www.gravatar.com/#{hash}.json")
-      JSON.parse(uri.open.string)["entry"].first
+      contact = {}
+      begin
+        contact = JSON.parse(uri.open.string)["entry"].first
+      rescue OpenURI::HTTPError => error
+        unless error.io.status[0] == "404"
+          puts error
+          raise ContactProviders::GenericContactError
+        end
+      end
+      {
+        hash: hash,
+        image: contact["thumbnailUrl"] || get_photo(email),
+        email: email,
+        name: contact["name"] || {}
+      }
     end
 
     def authed?

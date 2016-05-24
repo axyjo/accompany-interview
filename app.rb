@@ -79,7 +79,7 @@ class AccompanyInterview < Sinatra::Application
     provider = @contact_providers[provider_name]
     return halt(404) if provider.nil?
     return halt(401) unless provider.authed?
-    email = URI.unescape(params['email'])
+    email = params['email']
     begin
       json provider.get_profile(email)
     rescue ContactProviders::NoProfileFound
