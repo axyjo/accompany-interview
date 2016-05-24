@@ -119,7 +119,7 @@ app.ContactListRowView = Backbone.View.extend({
   },
   render: function() {
     this.$el.empty();
-    this.$el.append(this.model.get('name'));
+    this.$el.append(this.model.get('name') || this.model.get('email'));
     if (this.profileFetched) {
       this.$el.append("<img src='" + this.profile.get('image') + "' />");
     }
