@@ -5,6 +5,9 @@ require 'interface'
 require 'time'
 
 module CalendarProviders
+  # This class provides a CalendarProvider compatible with the interface for
+  # Google Calendar. At the moment, it only supports reading from public and
+  # private user calendars.
   class GoogleCalendar
     APPLICATION_NAME = 'Accompany Interview'.freeze
     CLIENT_SECRETS_PATH = 'client_secret.json'.freeze

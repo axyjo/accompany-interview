@@ -5,8 +5,11 @@ require 'uri'
 
 require_relative 'lib/calendars'
 
+# This class handles the HTTP requests for the calendar application.
 class AccompanyInterview < Sinatra::Application
   def initialize
+    # When adding new providers, add a key-value mapping of a symbol to an
+    # instance of the calendar provider.
     @calendar_providers = {
       google: CalendarProviders::GoogleCalendar.new
     }
@@ -30,10 +33,13 @@ class AccompanyInterview < Sinatra::Application
     redirect '/'
   end
 
+  # Renders the layout, which contains the Javascript necessary to bootstrap
+  # the page.
   get '/' do
     erb :index
   end
 
+  # Gets a list of calendars for all enabled sources.
   get '/sources' do
     calendars = []
     @calendar_providers.each do |key, provider|
@@ -47,6 +53,7 @@ class AccompanyInterview < Sinatra::Application
     json calendars
   end
 
+  # Gets a list of events for a given provider and calendar ID.
   get '/events/:provider/:id' do
     provider_name = params['provider'].to_sym
     provider = @calendar_providers[provider_name]
