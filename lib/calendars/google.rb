@@ -25,15 +25,15 @@ module CalendarProviders
       begin
         response = service.list_events(id, options)
         format_events(response)
-      rescue Google::Apis::ClientError => e
+      rescue Google::Apis::ClientError => error
         puts e.body
-        raise NoCalendarFound if e.status_code == 404
+        raise NoCalendarFound if error.status_code == 404
         raise GenericCalendarError
       end
     end
 
     def auth(code = nil)
-      if code.nil?
+      if code.empty?
         authorizer.get_authorization_url(base_url: BASE_URL)
       else
         authorizer.get_and_store_credentials_from_code(
@@ -43,70 +43,72 @@ module CalendarProviders
     end
 
     def authed?
-      !credentials.nil?
+      !credentials.empty?
     end
 
     implements CalendarProviders::Interface
 
-    private
+    class << self
+      private
 
-    def authorizer
-      client_id = Google::Auth::ClientId.from_file(CLIENT_SECRETS_PATH)
-      token_store = Google::Auth::Stores::FileTokenStore.new(
-        file: CREDENTIALS_PATH
-      )
-      Google::Auth::UserAuthorizer.new(client_id, SCOPE, token_store)
-    end
-
-    def credentials
-      user_id = 'default'
-      authorizer.get_credentials(user_id)
-    end
-
-    def service
-      service = Google::Apis::CalendarV3::CalendarService.new
-      service.client_options.application_name = APPLICATION_NAME
-      service.authorization = credentials
-      service
-    end
-
-    def event_options(params)
-      options = {
-        max_results: 2500, single_events: true, order_by: 'startTime'
-      }
-
-      unless params[:start].nil?
-        options[:time_min] = DateTime.parse(params[:start]).iso8601
+      def credentials
+        user_id = 'default'
+        authorizer.get_credentials(user_id)
       end
 
-      unless params[:end].nil?
-        options[:time_max] = DateTime.parse(params[:end]).iso8601
+      def service
+        service = Google::Apis::CalendarV3::CalendarService.new
+        service.client_options.application_name = APPLICATION_NAME
+        service.authorization = credentials
+        service
       end
 
-      options
-    end
+      def authorizer
+        client_id = Google::Auth::ClientId.from_file(CLIENT_SECRETS_PATH)
+        token_store = Google::Auth::Stores::FileTokenStore.new(
+          file: CREDENTIALS_PATH
+        )
+        Google::Auth::UserAuthorizer.new(client_id, SCOPE, token_store)
+      end
 
-    def format_calendars(response)
-      response.items.map do |cal|
-        {
-          id: cal.id,
-          title: cal.summary,
-          visible: (cal.primary || cal.selected),
-          color: cal.background_color,
-          textColor: cal.foreground_color,
-          description: cal.description
+      def event_options(params)
+        options = {
+          max_results: 2500, single_events: true, order_by: 'startTime'
         }
-      end
-    end
 
-    def format_events(response)
-      response.items.map do |event|
-        {
-          id: event.id,
-          title: event.summary,
-          start: event.start.date_time || event.start.date,
-          end: event.end.date_time || event.end.date
-        }
+        unless params[:start].empty?
+          options[:time_min] = DateTime.parse(params[:start]).iso8601
+        end
+
+        unless params[:end].empty?
+          options[:time_max] = DateTime.parse(params[:end]).iso8601
+        end
+
+        options
+      end
+
+      def format_calendars(response)
+        response.items.map do |cal|
+          {
+            id: cal.id,
+            title: cal.summary,
+            visible: (cal.primary || cal.selected),
+            color: cal.background_color,
+            textColor: cal.foreground_color,
+            description: cal.description
+          }
+        end
+      end
+
+      def format_events(response)
+        response.items.map do |event|
+          {
+            id: event.id,
+            title: event.summary,
+            start: event.start.date_time || event.start.date,
+            end: event.end.date_time || event.end.date
+          }
+        end
       end
     end
   end
