@@ -8,6 +8,8 @@ app.Sources = Backbone.Collection.extend({
   url: 'sources'
 });
 
+// Events are managed by FullCalendar, so we don't need a collection for those.
+
 /* Views */
 
 // The base view for the app -- renders the other elements on the page.
@@ -15,6 +17,10 @@ app.RootView = Backbone.View.extend({
   el: 'body',
   views: {},
   render: function() {
+    this.views.cal = new app.CalendarView();
+    this.$el.append(this.views.cal.$el);
+    this.views.cal.render();
+
     this.views.list = new app.SourceListView({collection: new app.Sources()});
     this.$el.append(this.views.list.$el);
     this.views.list.render();
@@ -33,15 +39,25 @@ app.SourceListRowView = Backbone.View.extend({
     this.render();
   },
   render: function() {
+    var $cal = app.root.views.cal.$el;
     this.$el.empty();
     if (this.model.get('visible')) {
       this.$el.css('color', this.model.get('textColor'));
       this.$el.css('background-color', this.model.get('color'));
+      $cal.fullCalendar('addEventSource', this.eventSource());
     } else {
       this.$el.css('color', 'inherit');
       this.$el.css('background-color', 'inherit');
+      $cal.fullCalendar('removeEventSource', this.eventSource());
     }
     this.$el.append(this.model.get('title'));
+  },
+  eventSource: function() {
+    return {
+      backgroundColor: this.model.get('color'),
+      textColor: this.model.get('textColor'),
+      url: this.model.get('url')
+    };
   }
 });
 
@@ -83,6 +99,16 @@ app.SourceListView = Backbone.View.extend({
   }
 });
 
+
+// Renders the FullCalendar widget
+app.CalendarView = Backbone.View.extend({
+  render: function() {
+    var self = this;
+    setTimeout(function() {
+      self.$el.fullCalendar({});
+    }, 0);
+  }
+});
 
 /* Router */
 
