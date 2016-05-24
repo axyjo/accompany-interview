@@ -2,16 +2,23 @@ require 'sinatra/base'
 require 'sinatra/json'
 require 'tilt/erb'
 
+require_relative 'lib/calendars'
+
 class AccompanyInterview < Sinatra::Application
+  def initialize
+    @calendar_providers = {google: CalendarProviders::GoogleCalendar.new()}
+    super
+  end
+
   get '/' do
     erb :index
   end
 
   get '/sources' do
-    return json []
+    json []
   end
 
   get '/events/:provider/:id' do
-    return json []
+    json []
   end
 end
