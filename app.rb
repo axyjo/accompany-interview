@@ -4,6 +4,7 @@ require 'tilt/erb'
 require 'uri'
 
 require_relative 'lib/calendars'
+require_relative 'lib/contacts'
 
 # This class handles the HTTP requests for the calendar application.
 class AccompanyInterview < Sinatra::Application
@@ -12,6 +13,9 @@ class AccompanyInterview < Sinatra::Application
     # instance of the calendar provider.
     @calendar_providers = {
       google: CalendarProviders::GoogleCalendar.new
+    }
+    @contact_providers = {
+      gravatar: ContactProviders::Gravatar.new
     }
     super
   end
@@ -66,6 +70,21 @@ class AccompanyInterview < Sinatra::Application
     rescue CalendarProviders::NoCalendarFound
       halt(404)
     rescue CalendarProviders::GenericCalendarError
+      halt(500)
+    end
+  end
+
+  get '/contacts/:provider/:email' do
+    provider_name = params['provider'].to_sym
+    provider = @contact_providers[provider_name]
+    return halt(404) if provider.nil?
+    return halt(401) unless provider.authed?
+    email = URI.unescape(params['email'])
+    begin
+      json provider.get_profile(email)
+    rescue ContactProviders::NoProfileFound
+      halt(404)
+    rescue ContactProviders::GenericContactError
       halt(500)
     end
   end
