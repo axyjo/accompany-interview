@@ -6,5 +6,7 @@ gem 'rspec'
 gem 'google-api-client', '0.9'
 gem 'interface'
 
+gem 'rack'
+
 gem 'rubocop'
 gem 'reek'

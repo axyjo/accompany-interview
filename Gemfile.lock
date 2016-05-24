@@ -134,6 +134,7 @@ PLATFORMS
 DEPENDENCIES
   google-api-client (= 0.9)
   interface
+  rack
   reek
   rspec
   rubocop
