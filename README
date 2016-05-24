@@ -10,6 +10,7 @@ change the base URI in `lib/calendars/google.rb`.
  - Support for primary private calendar (read-only)
  - Support for all private calendars, as well as shared calendars (read-only)
  - Toggle visiblity of each calendar within FullCalendar
+ - Calendar visiblity list supports debouncing of presses
  - Colour and default visiblity replication (one-way) from Google Calendar
  - Modular support for additional calendar (and contact) providers
  - Support for showing contact details on events with attendees
