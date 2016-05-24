@@ -71,10 +71,12 @@ app.SourceListRowView = Backbone.View.extend({
   },
   // We can force the visibility of a calendar instead of having to toggle it
   // conditionally.
-  toggleVisibility: function(force) {
-    var newVisibility = force === undefined? !this.model.get('visible'):force;
-    this.model.set('visible', newVisibility);
+  forceVisibility: function(visibility) {
+    this.model.set('visible', !!visibility);
     this.render();
+  },
+  toggleVisibility: function() {
+    this.forceVisibility(!this.model.get('visible'));
   },
   render: function() {
     var $cal = app.root.views.cal.$el;
@@ -88,6 +90,9 @@ app.SourceListRowView = Backbone.View.extend({
       this.$el.css('background-color', 'inherit');
       $cal.fullCalendar('removeEventSource', this.eventSource());
     }
+    var checkbox = $("<input type='checkbox' />"), self = this;
+    checkbox.each(function() { this.checked = self.model.get('visible'); });
+    this.$el.append(checkbox);
     this.$el.append(this.model.get('title'));
   },
   eventSource: function() {
