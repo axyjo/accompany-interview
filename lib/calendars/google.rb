@@ -33,7 +33,7 @@ module CalendarProviders
     end
 
     def auth(code = nil)
-      if code.empty?
+      if code.nil?
         authorizer.get_authorization_url(base_url: BASE_URL)
       else
         authorizer.get_and_store_credentials_from_code(
@@ -57,8 +57,11 @@ module CalendarProviders
       service
     end
 
+    def user_id
+      'default'
+    end
+
     def credentials
-      user_id = 'default'
       authorizer.get_credentials(user_id)
     end
 

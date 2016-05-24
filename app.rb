@@ -31,7 +31,7 @@ class AccompanyInterview < Sinatra::Application
 
   # Google specific route once the user authenticates
   get '/oauth2callback' do
-    unless params['code'].empty?
+    unless params['code'].nil?
       @calendar_providers[:google].auth(params['code'])
     end
     redirect '/'
