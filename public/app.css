@@ -1,0 +1,10 @@
+.main {
+  max-width: 70%;
+  float: right;
+}
+
+.side {
+  max-width: 25%;
+  float: left;
+}
+
