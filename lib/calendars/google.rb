@@ -3,60 +3,29 @@ require 'googleauth'
 require 'googleauth/stores/file_token_store'
 require 'interface'
 require 'time'
-require 'uri'
 
-module CalendarProviders 
+module CalendarProviders
   class GoogleCalendar
-    APPLICATION_NAME = 'Accompany Interview'
-    CLIENT_SECRETS_PATH = 'client_secret.json'
-    CREDENTIALS_PATH = 'google.yml'
-    BASE_URL = 'http://accompany.axyjo.com:4567/'
+    APPLICATION_NAME = 'Accompany Interview'.freeze
+    CLIENT_SECRETS_PATH = 'client_secret.json'.freeze
+    CREDENTIALS_PATH = 'google.yml'.freeze
+    BASE_URL = 'http://accompany.axyjo.com:4567/'.freeze
 
     SCOPE = Google::Apis::CalendarV3::AUTH_CALENDAR
 
     def list_calendars
-      response = service.list_calendar_lists()
-      return response.items.map do |cal|
-        {
-          id: cal.id,
-          title: cal.summary,
-          visible: !!(cal.primary || cal.selected),
-          color: cal.background_color,
-          textColor: cal.foreground_color,
-          description: cal.description
-        }
-    end
-
+      format_calendars(service.list_calendar_lists)
     end
 
     def list_events(id, params)
-      options = {
-        max_results: 2500,
-        single_events: true,
-        show_deleted: false,
-        order_by: 'startTime',
-      }
-      if !params[:start].nil?
-        options[:time_min] = DateTime.parse(params[:start]).iso8601
-      end
-      if !params[:end].nil?
-        options[:time_max] = DateTime.parse(params[:end]).iso8601
-      end
+      options = event_options(params)
       begin
         response = service.list_events(id, options)
+        format_events(response)
       rescue Google::Apis::ClientError => e
         puts e.body
         raise NoCalendarFound if e.status_code == 404
         raise GenericCalendarError
-      end
-
-      return response.items.map do |event|
-        {
-          id: event.id,
-          title: event.summary,
-          start: event.start.date_time || event.start.date,
-          end: event.end.date_time || event.end.date
-        }
       end
     end
 
@@ -65,7 +34,8 @@ module CalendarProviders
         authorizer.get_authorization_url(base_url: BASE_URL)
       else
         authorizer.get_and_store_credentials_from_code(
-          user_id: user_id, code: code, base_url: BASE_URL)
+          user_id: user_id, code: code, base_url: BASE_URL
+        )
       end
     end
 
@@ -76,9 +46,12 @@ module CalendarProviders
     implements CalendarProviders::Interface
 
     private
+
     def authorizer
       client_id = Google::Auth::ClientId.from_file(CLIENT_SECRETS_PATH)
-      token_store = Google::Auth::Stores::FileTokenStore.new(file: CREDENTIALS_PATH)
+      token_store = Google::Auth::Stores::FileTokenStore.new(
+        file: CREDENTIALS_PATH
+      )
       Google::Auth::UserAuthorizer.new(client_id, SCOPE, token_store)
     end
 
@@ -93,7 +66,45 @@ module CalendarProviders
       service.authorization = credentials
       service
     end
+
+    def event_options(params)
+      options = {
+        max_results: 2500, single_events: true, order_by: 'startTime'
+      }
+
+      unless params[:start].nil?
+        options[:time_min] = DateTime.parse(params[:start]).iso8601
+      end
+
+      unless params[:end].nil?
+        options[:time_max] = DateTime.parse(params[:end]).iso8601
+      end
+
+      options
+    end
+
+    def format_calendars(response)
+      response.items.map do |cal|
+        {
+          id: cal.id,
+          title: cal.summary,
+          visible: (cal.primary || cal.selected),
+          color: cal.background_color,
+          textColor: cal.foreground_color,
+          description: cal.description
+        }
+      end
+    end
+
+    def format_events(response)
+      response.items.map do |event|
+        {
+          id: event.id,
+          title: event.summary,
+          start: event.start.date_time || event.start.date,
+          end: event.end.date_time || event.end.date
+        }
+      end
+    end
   end
 end
-
-

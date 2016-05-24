@@ -7,7 +7,9 @@ require_relative 'lib/calendars'
 
 class AccompanyInterview < Sinatra::Application
   def initialize
-    @calendar_providers = {google: CalendarProviders::GoogleCalendar.new()}
+    @calendar_providers = {
+      google: CalendarProviders::GoogleCalendar.new
+    }
     super
   end
 
@@ -22,7 +24,7 @@ class AccompanyInterview < Sinatra::Application
 
   # Google specific route once the user authenticates
   get '/oauth2callback' do
-    if !params['code'].empty?
+    unless params['code'].empty?
       @calendar_providers[:google].auth(params['code'])
     end
     redirect '/'
