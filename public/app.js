@@ -17,6 +17,9 @@ app.Sources = Backbone.Collection.extend({
 app.Attendees = Backbone.Collection.extend({
 });
 
+// Cache profile lookups so that we don't have a round trip every time.
+app.ProfileCache = new Backbone.Collection();
+
 // Events are managed by FullCalendar, so we don't need a collection for those.
 
 /* Layouts */
@@ -100,11 +103,18 @@ app.ContactListRowView = Backbone.View.extend({
   profileFetched: false,
   initialize: function() {
     var self = this;
-    this.profile = new app.Profile({id: this.model.get('email')});
-    $.when(this.profile.fetch()).then(function() {
-      self.profileFetched = true;
-      self.render();
-    });
+    var id = this.model.get('email');
+    this.profile = app.ProfileCache.get(id);
+    if (this.profile) {
+      this.profileFetched = true;
+    } else {
+      this.profile = new app.Profile({id: id});
+      $.when(this.profile.fetch()).then(function() {
+        app.ProfileCache.add(self.profile);
+        self.profileFetched = true;
+        self.render();
+      });
+    }
   },
   render: function() {
     this.$el.empty();
