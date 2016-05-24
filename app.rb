@@ -34,7 +34,12 @@ class AccompanyInterview < Sinatra::Application
   get '/sources' do
     calendars = []
     @calendar_providers.each do |key, provider|
-      calendars << provider.list_calendars
+      provided_list = provider.list_calendars
+      provided_list.map! do |source|
+        source[:url] = '/events/' + key.to_s + '/' + source[:id]
+        source
+      end
+      calendars << provided_list
     end
     json calendars
   end
