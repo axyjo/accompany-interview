@@ -21,4 +21,11 @@ server to provide it with data, as well as a place for OAuth callbacks to go
 to. The only page Sinatra renders in ERB is the index page -- all others are
 either redirects, or JSON.
 
-In order to make the front end modular, I used Backbone.js.
+In order to make the front end modular, I used Backbone.js. I'm not great at
+front-end stylesheets, so it's pretty spartan. I could have used Bootstrap or
+something of that nature, but it wouldn't be representative of my CSS/design
+skills.
+
+The Google authentication mechanism currently uses a file on disk. In
+production, in order to share credentials with many machines, I'd opt to use
+the Redis store, as it provides a fast and easy in-memory key-value store.
