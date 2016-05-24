@@ -78,27 +78,52 @@ app.SourceListRowView = Backbone.View.extend({
   // conditionally.
   forceVisibility: function(visibility) {
     this.model.set('visible', !!visibility);
-    this.render();
+    this.colourUpdate();
+    this.calendarUpdate();
+    this.checkboxUpdate();
   },
   toggleVisibility: function() {
     this.forceVisibility(!this.model.get('visible'));
   },
   render: function() {
-    var $cal = app.root.views.cal.$el;
     this.$el.empty();
+    var checkbox = $("<input type='checkbox' />")
+    this.$el.append(checkbox);
+    this.$el.append(this.model.get('title'));
+
+    this.colourUpdate();
+    this.checkboxUpdate();
+    this.calendarUpdate(true);
+  },
+  colourUpdate: function() {
     if (this.model.get('visible')) {
       this.$el.css('color', this.model.get('textColor'));
       this.$el.css('background-color', this.model.get('color'));
-      $cal.fullCalendar('addEventSource', this.eventSource());
     } else {
       this.$el.css('color', 'inherit');
       this.$el.css('background-color', 'inherit');
-      $cal.fullCalendar('removeEventSource', this.eventSource());
     }
-    var checkbox = $("<input type='checkbox' />"), self = this;
+  },
+  calendarUpdate: function(noTimeout) {
+    // Some debouncing magic, hopefully
+    if (noTimeout) {
+      var $cal = app.root.views.cal.$el;
+      var visible = this.model.get('visible') === true;
+      var action = visible ? 'addEventSource' : 'removeEventSource';
+      $cal.fullCalendar('removeEventSource', this.eventSource());
+      if (visible) {
+        $cal.fullCalendar('addEventSource', this.eventSource());
+      }
+    } else {
+      if (this.timeout) {
+        clearTimeout(this.timeout);
+      }
+      this.timeout = setTimeout(_.bind(this.calendarUpdate, this, true), 150);
+    }
+  },
+  checkboxUpdate: function() {
+    var checkbox = this.$el.find('input[type=checkbox]'), self = this;
     checkbox.each(function() { this.checked = self.model.get('visible'); });
-    this.$el.append(checkbox);
-    this.$el.append(this.model.get('title'));
   },
   eventSource: function() {
     return {
