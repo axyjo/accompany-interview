@@ -39,7 +39,7 @@ class AccompanyInterview < Sinatra::Application
         source[:url] = '/events/' + key.to_s + '/' + source[:id]
         source
       end
-      calendars << provided_list
+      calendars.push(*provided_list)
     end
     json calendars
   end
