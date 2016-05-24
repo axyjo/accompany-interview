@@ -15,6 +15,7 @@ app.Sources = Backbone.Collection.extend({
 
 // A collection to manage an event's attendees
 app.Attendees = Backbone.Collection.extend({
+  comparator: 'email'
 });
 
 // Cache profile lookups so that we don't have a round trip every time.
