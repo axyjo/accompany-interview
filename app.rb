@@ -1,6 +1,7 @@
 require 'sinatra/base'
 require 'sinatra/json'
 require 'tilt/erb'
+require 'uri'
 
 require_relative 'lib/calendars'
 
@@ -36,7 +37,7 @@ class AccompanyInterview < Sinatra::Application
     @calendar_providers.each do |key, provider|
       provided_list = provider.list_calendars
       provided_list.map! do |source|
-        source[:url] = '/events/' + key.to_s + '/' + source[:id]
+        source[:url] = '/events/' + key.to_s + '/' + URI.escape(source[:id])
         source
       end
       calendars.push(*provided_list)
@@ -45,6 +46,16 @@ class AccompanyInterview < Sinatra::Application
   end
 
   get '/events/:provider/:id' do
-    json []
+    provider_name = params['provider'].to_sym
+    provider = @calendar_providers[provider_name]
+    return halt(404) if provider.nil?
+    id = URI.unescape(params['id'])
+    begin
+      json provider.list_events(id, params)
+    rescue CalendarProviders::NoCalendarFound
+      halt(404)
+    rescue CalendarProviders::GenericCalendarError
+      halt(500)
+    end
   end
 end

@@ -29,8 +29,7 @@ module CalendarProviders
 
     end
 
-    def list_events(params)
-      id = URI.unescape(params[:id])
+    def list_events(id, params)
       options = {
         max_results: 2500,
         single_events: true,
@@ -47,7 +46,8 @@ module CalendarProviders
         response = service.list_events(id, options)
       rescue Google::Apis::ClientError => e
         puts e.body
-        return []
+        raise NoCalendarFound if e.status_code == 404
+        raise GenericCalendarError
       end
 
       return response.items.map do |event|
