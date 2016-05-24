@@ -158,12 +158,14 @@ app.ListView = Backbone.View.extend({
     if (this._rendered) {
       view.render();
       this.$el.append(view.$el);
+      this.$el.find('.no-entries').toggle(!this._rowViews.length);
     }
   },
   remove: function(source) {
     var view = _.select(this._rowViews, function(el) { return el.model === source; })[0];
     this._rowViews = _.without(this._rowViews, view);
     view.remove();
+    this.$el.find('.no-entries').toggle(!this._rowViews.length);
   },
   render: function() {
     this._rendered = true;
@@ -173,6 +175,8 @@ app.ListView = Backbone.View.extend({
     _.each(this._rowViews, function(rv) {
       self.$el.append(rv.render().$el);
     });
+    this.$el.append("<span class='no-entries'>(no entries)</span>");
+    this.$el.find('.no-entries').toggle(!this._rowViews.length);
   }
 });
 
