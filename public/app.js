@@ -66,21 +66,30 @@ app.SourceListRowView = Backbone.View.extend({
 });
 
 
-// Responsible for rendering the collection of calendars to the page.
-app.SourceListView = Backbone.View.extend({
+// A generic list view to render lists of things.
+app.ListView = Backbone.View.extend({
   tagName: 'table',
+  autoFetch: true,
   initialize: function () {
     _.bindAll(this, 'add', 'remove');
+    var self = this;
     this._rowViews = [];
 
     // Bind events on source list
     this.collection.each(this.add);
     this.collection.bind('add', this.add);
     this.collection.bind('remove', this.remove);
-    this.collection.fetch();
+    this.collection.bind('reset', function(collection, opts) {
+      _(opts.previousModels).each(self.remove);
+      collection.each(self.add);
+    });
+
+    if (this.autoFetch) {
+      this.collection.fetch();
+    }
   },
   add: function(source) {
-    var view = new app.SourceListRowView({model: source});
+    var view = new this.rowView({model: source});
     this._rowViews.push(view);
 
     if (this._rendered) {
@@ -103,6 +112,16 @@ app.SourceListView = Backbone.View.extend({
   }
 });
 
+// Responsible for rendering the collection of calendars to the page.
+app.SourceListView = app.ListView.extend({
+  rowView: app.SourceListRowView
+});
+
+// Responsible for showing meeting attendees
+app.ContactListView = app.ListView.extend({
+  autoFetch: false,
+  rowView: app.ContactListRowView
+});
 
 // Renders the FullCalendar widget
 app.CalendarView = Backbone.View.extend({
