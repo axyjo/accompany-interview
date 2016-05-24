@@ -47,8 +47,11 @@ app.SourceListRowView = Backbone.View.extend({
   events: {
     'click': 'toggleVisibility'
   },
-  toggleVisibility: function() {
-    this.model.set('visible', !this.model.get('visible'));
+  // We can force the visibility of a calendar instead of having to toggle it
+  // conditionally.
+  toggleVisibility: function(force) {
+    var newVisibility = force === undefined? !this.model.get('visible'):force;
+    this.model.set('visible', newVisibility);
     this.render();
   },
   render: function() {
