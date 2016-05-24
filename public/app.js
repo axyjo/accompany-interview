@@ -19,24 +19,42 @@ app.Attendees = Backbone.Collection.extend({
 
 // Events are managed by FullCalendar, so we don't need a collection for those.
 
+/* Layouts */
+app.SidePane = Backbone.View.extend({
+  className: 'side'
+});
+
+app.MainPane = Backbone.View.extend({
+  className: 'main'
+});
+
 /* Views */
 
 // The base view for the app -- renders the other elements on the page.
 app.RootView = Backbone.View.extend({
   el: 'body',
+  layouts: {},
   views: {},
   render: function() {
+    this.layouts.main = new app.MainPane();
+    this.layouts.main.render();
+    this.$el.append(this.layouts.main.$el);
+
+    this.layouts.side = new app.SidePane();
+    this.layouts.side.render();
+    this.$el.append(this.layouts.side.$el);
+
     this.views.cal = new app.CalendarView();
     this.views.cal.render();
-    this.$el.append(this.views.cal.$el);
+    this.layouts.main.$el.append(this.views.cal.$el);
 
     this.views.list = new app.SourceListView({collection: new app.Sources()});
     this.views.list.render();
-    this.$el.append(this.views.list.$el);
+    this.layouts.side.$el.append(this.views.list.$el);
 
     this.views.contact = new app.ContactListView({collection: new app.Attendees()});
     this.views.contact.render();
-    this.$el.append(this.views.contact.$el);
+    this.layouts.side.$el.append(this.views.contact.$el);
   }
 });
 
