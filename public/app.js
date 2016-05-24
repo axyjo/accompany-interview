@@ -52,7 +52,12 @@ app.RootView = Backbone.View.extend({
     this.views.cal.render();
     this.layouts.main.$el.append(this.views.cal.$el);
 
-    this.views.list = new app.SourceListView({collection: new app.Sources()});
+    var sources = new app.Sources();
+    this.views.signin = new app.SignInView({collection: sources});
+    this.views.signin.render();
+    this.layouts.side.$el.append(this.views.signin.$el);
+
+    this.views.list = new app.SourceListView({collection: sources});
     this.views.list.render();
     this.layouts.side.$el.append(this.views.list.$el);
 
@@ -196,6 +201,23 @@ app.ContactListView = app.ListView.extend({
   title: "Event Attendees",
   autoFetch: false,
   rowView: app.ContactListRowView
+});
+
+// Responsible for displaying the sign in link if we have no calendar sources.
+app.SignInView = Backbone.View.extend({
+  initialize: function() {
+    _.bindAll(this, 'render');
+    this.collection.on('reset', this.render);
+    this.collection.on('add', this.render);
+    this.collection.on('remove', this.render);
+  },
+  render: function() {
+    this.$el.empty();
+    if (this.collection.length === 0) {
+      this.$el.append("<h3>Sign In</h3>");
+      this.$el.append("<a href='/googleauth'>Sign in with Google</a>");
+    }
+  }
 });
 
 // Renders the FullCalendar widget
