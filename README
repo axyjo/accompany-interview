@@ -1,4 +1,24 @@
 Accompany Interview Project
 ===========================
 
-To run, run `bundle install` and then `rackup -p 4567`.
+To run, run `bundle install` and then `rackup -p 4567`. You'll need a
+`client_secret.json` for Google's APIs in this directory. You'll also need to
+change the base URI in `lib/calendars/google.rb`.
+
+
+# Features Implemented
+ - Support for primary private calendar (read-only)
+ - Support for all private calendars, as well as shared calendars (read-only)
+ - Toggle visiblity of each calendar within FullCalendar
+ - Colour and default visiblity replication (one-way) from Google Calendar
+ - Modular support for additional calendar (and contact) providers
+ - Support for showing contact details on events with attendees
+
+# Architecture
+
+This project is mostly a single-page webapp which relies on a few routes on the
+server to provide it with data, as well as a place for OAuth callbacks to go
+to. The only page Sinatra renders in ERB is the index page -- all others are
+either redirects, or JSON.
+
+In order to make the front end modular, I used Backbone.js.
