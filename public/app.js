@@ -1,5 +1,10 @@
 var app = app || {};
 
+/* Models */
+app.Profile = Backbone.Model.extend({
+  urlRoot: 'contacts/gravatar'
+});
+
 /* Collections */
 
 // A small collection definition for the multiple calendar list. We use the
@@ -71,9 +76,21 @@ app.SourceListRowView = Backbone.View.extend({
 
 app.ContactListRowView = Backbone.View.extend({
   tagName: 'tr',
+  profileFetched: false,
+  initialize: function() {
+    var self = this;
+    this.profile = new app.Profile({id: this.model.get('email')});
+    $.when(this.profile.fetch()).then(function() {
+      self.profileFetched = true;
+      self.render();
+    });
+  },
   render: function() {
     this.$el.empty();
     this.$el.append(this.model.get('name'));
+    if (this.profileFetched) {
+      this.$el.append("<img src='" + this.profile.get('image') + "' />");
+    }
   }
 });
 
