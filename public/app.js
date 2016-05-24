@@ -118,6 +118,7 @@ app.ContactListRowView = Backbone.View.extend({
 // A generic list view to render lists of things.
 app.ListView = Backbone.View.extend({
   tagName: 'table',
+  title: '',
   autoFetch: true,
   initialize: function () {
     _.bindAll(this, 'add', 'remove');
@@ -155,6 +156,7 @@ app.ListView = Backbone.View.extend({
     this._rendered = true;
     var self = this;
     this.$el.empty();
+    this.$el.append("<h3>" + this.title + "</h3>");
     _.each(this._rowViews, function(rv) {
       self.$el.append(rv.render().$el);
     });
@@ -163,11 +165,13 @@ app.ListView = Backbone.View.extend({
 
 // Responsible for rendering the collection of calendars to the page.
 app.SourceListView = app.ListView.extend({
+  title: "Calendars",
   rowView: app.SourceListRowView
 });
 
 // Responsible for showing meeting attendees
 app.ContactListView = app.ListView.extend({
+  title: "Event Attendees",
   autoFetch: false,
   rowView: app.ContactListRowView
 });
