@@ -5,10 +5,10 @@ require 'interface'
 #  - list_calendars: returns a list of calendars accessible by this provider
 #  - list_events(id, params): returns a list of events for a particular
 #                             calendar
-#  - auth: checks if the user is authorized to access this provider
+#  - authed?: checks if the user is authorized to access this provider
 module CalendarProviders
   Interface = interface do
-    required_methods :list_calendars, :list_events, :auth
+    required_methods :list_calendars, :list_events, :authed?
   end
 
   # This exception should be raised when list_events cannot find a calendar by

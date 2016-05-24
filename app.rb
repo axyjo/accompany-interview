@@ -43,6 +43,7 @@ class AccompanyInterview < Sinatra::Application
   get '/sources' do
     calendars = []
     @calendar_providers.each do |key, provider|
+      next unless provider.authed?
       provided_list = provider.list_calendars
       provided_list.map! do |source|
         source[:url] = '/events/' + key.to_s + '/' + URI.escape(source[:id])
@@ -58,6 +59,7 @@ class AccompanyInterview < Sinatra::Application
     provider_name = params['provider'].to_sym
     provider = @calendar_providers[provider_name]
     return halt(404) if provider.nil?
+    return halt(401) unless provider.authed?
     id = URI.unescape(params['id'])
     begin
       json provider.list_events(id, params)
